@@ -1,0 +1,41 @@
+
+<mat-card>
+    <div class="contenido-editar">
+        <mat-card-title class="titulo"> {{tipo}} MAPEO</mat-card-title> 
+        <button class="boton-salir" (click)="onCloseClick()">x</button>
+    </div>
+    <mat-divider class="divider"></mat-divider>
+    <mat-card-content>  
+        <form>
+            <div class="grid">
+                <div class="left-column">
+                    <p class="nombre-input">NOMBRE DEPENCIA</p>
+                    <input type="text" [value]="element.nombre" readonly class="input-centrado">
+                    <p class="nombre-input">IDENTIFICACION ARGO</p>
+                    <input type="text">
+                    <button class="boton-accion">{{tipo}} MAPEO</button>
+                </div>
+                <div class="right-column">
+                    <p class="nombre-input">NÚMERO DE IDENTIFICACIÓN INTERNO<button class="boton-ayuda">?   
+                        <span class="tooltip-text-mapeo">
+                        <p>• Es un número interno unico seleccionado bajo los criterios establecidos.</p>
+                    </span></button></p>
+                    <input type="text">
+                    <p class="nombre-input">CODIGO SNIES<button class="boton-ayuda">?   
+                        <span class="tooltip-text-mapeo">
+                        <p>• Es el número que el Ministerio de Educación le asigna a un programa acedemico de educación superior.</p>
+                    </span></button></p>
+                    <input type="text">
+                    <p class="nombre-input">CODIGO IRIS<button class="boton-ayuda">?   
+                        <span class="tooltip-text-mapeo">
+                        <p>• Es el número que el Ministerio de Educación le asigna a un programa acedemico de educación superior.</p>
+                    </span></button></p>
+                    <input type="text">
+                </div>
+            </div>
+
+        </form> 
+    </mat-card-content>
+</mat-card> 
+
+
