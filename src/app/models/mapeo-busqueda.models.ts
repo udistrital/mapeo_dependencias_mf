@@ -4,4 +4,8 @@ export interface MapeoBusqueda {
     dependenciasAsociadas: string;
     tipoDependencia: string[];
     tipo: string;
+    idArgo: number;
+    numIdInterno: number;
+    codSnies: number;
+    codIris: number; 
 }

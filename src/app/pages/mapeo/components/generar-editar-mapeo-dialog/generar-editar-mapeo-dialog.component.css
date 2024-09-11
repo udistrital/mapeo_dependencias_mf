@@ -64,6 +64,10 @@
     margin-bottom: 5px;
 }
 
+.left-column .tooltip-text-mapeo{
+    left: calc(100% + 5px);
+}
+
 .boton-ayuda:hover .tooltip-text-mapeo{
     visibility: visible;
     opacity: 1;
@@ -75,6 +79,7 @@
     padding-left: 10%;
     align-items: center;
     align-self: center;
+    width: 70%;
 }
 
 .contenedor-boton-accion {

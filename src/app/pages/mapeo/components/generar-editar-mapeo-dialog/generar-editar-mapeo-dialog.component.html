@@ -6,31 +6,34 @@
     </div>
     <mat-divider class="divider"></mat-divider>
     <mat-card-content>  
-        <form>
+        <form [formGroup]= "MapeoForm">
             <div class="grid">
                 <div class="left-column">
                     <p class="nombre-input">NOMBRE DEPENCIA</p>
-                    <input type="text" [value]="element.nombre" readonly class="input-centrado">
-                    <p class="nombre-input">IDENTIFICACION ARGO</p>
-                    <input type="text">
-                    <button class="boton-accion">{{tipo}} MAPEO</button>
+                    <input type="text" readonly class="input-centrado" formControlName="nombre">
+                    <p class="nombre-input">IDENTIFICACION ARGO<button class="boton-ayuda">?   
+                        <span class="tooltip-text-mapeo">
+                        <p>• Es el identificador de id para el sistema de ARGO.</p>
+                    </span></button></p>
+                    <input type="text" formControlName="idArgo">
+                    <button class="boton-accion" (click)="gestorAccionTipo()">{{tipo}} MAPEO</button>
                 </div>
                 <div class="right-column">
                     <p class="nombre-input">NÚMERO DE IDENTIFICACIÓN INTERNO<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es un número interno unico seleccionado bajo los criterios establecidos.</p>
+                        <p>• Es el identificador master de OIKOS de la dependencia.</p>
                     </span></button></p>
-                    <input type="text">
+                    <input type="text" formControlName="numIdInterno">
                     <p class="nombre-input">CODIGO SNIES<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es el número que el Ministerio de Educación le asigna a un programa acedemico de educación superior.</p>
+                        <p>• Es el número que el Ministerio de Educación Nacional le asigna a un programa acedemico de educación superior.</p>
                     </span></button></p>
-                    <input type="text">
+                    <input type="text" formControlName="codSnies">
                     <p class="nombre-input">CODIGO IRIS<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es el número que el Ministerio de Educación le asigna a un programa acedemico de educación superior.</p>
+                        <p>• Es el número que define un código para identificador en IRIS.</p>
                     </span></button></p>
-                    <input type="text">
+                    <input type="text" formControlName="codIris">
                 </div>
             </div>
 
