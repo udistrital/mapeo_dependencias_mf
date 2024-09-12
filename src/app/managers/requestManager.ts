@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, mergeMap, retry } from 'rxjs/operators';
 import { HttpErrorManager } from './errorManager'
+import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
  * This class manage the http connections with internal REST services. Use the response format {
@@ -11,24 +12,33 @@ import { HttpErrorManager } from './errorManager'
  *  ...
  * }
  */
+interface HeaderObject {
+  headers: HttpHeaders;
+}
+
 @Injectable({
   providedIn: 'root',
 })
+
 export class RequestManager {
   private path!: any;
+  private headerSubject = new BehaviorSubject<HeaderObject>({
+    headers: new HttpHeaders()
+  });
+  public header$ = this.headerSubject.asObservable();
   public httpOptions: any;
   constructor(private http: HttpClient, private errManager: HttpErrorManager) {
     const acces_token = window.localStorage.getItem('access_token');
     if (acces_token !== null) {
-      this.httpOptions = {
+      this.headerSubject.next({
         headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          'Accept': 'application/json, application/xml, text/plain',
+          'Accept': 'application/json',
           'Authorization': `Bearer ${acces_token}`,
         }),
-      }
-      const headers = this.httpOptions.headers.keys().map((key:string) => ({ [key]: this.httpOptions.headers.get(key) }));
-      console.log("CREACION HTTP HEADER:", headers);
+      });
+      console.log("ENTRA")
+      //const headers = this.httpOptions.headers.keys().map((key:string) => ({ [key]: this.httpOptions.headers.get(key) }));
+      console.log("CREACION HTTP HEADER:");
     }
   }
 
@@ -44,102 +54,39 @@ export class RequestManager {
 
   /**
    * Perform a GET http request
+   *
    * @param endpoint service's end-point
    * @param params (an Key, Value object with que query params for the request)
    * @returns Observable<any>
    */
-  /*
-  get(endpoint: any) {
-    const headers = this.httpOptions.headers.keys().map((key:string) => ({ [key]: this.httpOptions.headers.get(key) }));
-    console.log("HTTP HEADER:", headers);
-    return this.http.get<any>(`${this.path}${endpoint}`, this.httpOptions).pipe(
-      map(
-        (res) => {
-          if (res.hasOwnProperty('Body')) {
-            return res;
-          } else {
-            return res;
-          }
-        },
-      ),
-      catchError(this.errManager.handleError.bind(this)),
-    );
-  }*/
-  //INICIO PRUEBA RECEPCIÓN RESPUESTAS DInÄMICAS
-    get(endpoint: any) {
-      return this.http.get(`${this.path}${endpoint}`, { ...this.httpOptions, responseType: 'arraybuffer' }).pipe(
-        map((response: ArrayBuffer) => {
-          
-          const text = new TextDecoder().decode(response);
-          if (this.isXML(text)) {
-            return this.parseXML(text);  
-          } else {
-            return JSON.parse(text); 
-          }
-        }),
-        catchError(error => {
-          console.error('Error en la solicitud:', error);
-          return this.errManager.handleError(error); 
-        }),
-      );
-    }
-  
-
-    private isXML(response: string): boolean {
-      return response.startsWith('<') && response.includes('<?xml');
-    }
-
-    private parseXML(xmlString: string) {
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(xmlString, 'application/xml');
-      return this.xmlToJson(xml);
-    }
-  
-    
-    private xmlToJson(xml: any): any {
-      let obj: any = {};
-  
-      if (xml.nodeType === 1) {
-        if (xml.attributes.length > 0) {
-          obj["@attributes"] = {};
-          for (let j = 0; j < xml.attributes.length; j++) {
-            const attribute = xml.attributes.item(j);
-            obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
-          }
+  get(endpoint: undefined): Observable<any> {
+    return this.header$.pipe(
+      mergeMap(headerObj => {
+        // Accede a los headers desde el objeto que emite el BehaviorSubject
+        const headers = headerObj['headers'];
+        console.log("headers ", headers)
+        // Verifica que los headers existen antes de continuar
+        if (!headers) {
+          throw new Error('Headers not found');
         }
-      } else if (xml.nodeType === 3) {
-        obj = xml.nodeValue;
-      }
-  
-      if (xml.hasChildNodes()) {
-        for (let i = 0; i < xml.childNodes.length; i++) {
-          const item = xml.childNodes.item(i);
-          const nodeName = item.nodeName;
-          if (typeof obj[nodeName] === "undefined") {
-            obj[nodeName] = this.xmlToJson(item);
-          } else {
-            if (typeof obj[nodeName].push === "undefined") {
-              const old = obj[nodeName];
-              obj[nodeName] = [];
-              obj[nodeName].push(old);
+        // Crea el objeto de opciones con los headers y observe
+        const options = {
+          headers: headers, // Asegúrate de que headers está correctamente referenciado
+          observe: 'body' as const // 'observe' fuera de los headers
+        };
+        // Asegúrate de retornar el Observable de la solicitud HTTP
+        return this.http.get<any>(`${this.path}${endpoint}`, options).pipe(
+          map((res: any) => {
+            if (res.hasOwnProperty('Body')) {
+              return res.Body;
+            } else {
+              return res;
             }
-            obj[nodeName].push(this.xmlToJson(item));
-          }
-        }
-      }
-  
-      return obj;
-    }
-// FIN PRUEBA DE RECEPCION DINAMICA DE RESPUESTAS
-  /**
-   * Perform a POST http request
-   * @param endpoint service's end-point
-   * @param element data to send as JSON
-   * @returns Observable<any>
-   */
-  post(endpoint: any, element: any) {
-    return this.http.post<any>(`${this.path}${endpoint}`, element, this.httpOptions).pipe(
-      catchError(this.errManager.handleError),
+          }),
+          retry(2),
+          catchError(this.errManager.handleError.bind(this)),
+        );
+      })
     );
   }
 
@@ -149,11 +96,20 @@ export class RequestManager {
    * @param element data to send as JSON
    * @returns Observable<any>
    */
-  post_file(endpoint: any, element: any) {
-    return this.http.post<any>(`${this.path}${endpoint}`, element, {    headers: new HttpHeaders({
-      'Content-Type': 'multipart/form-data',
-  })}).pipe(
-      catchError(this.errManager.handleError),
+  post(endpoint: any, element: any): Observable<any> {
+    return this.header$.pipe(
+      mergeMap(headerObj => {
+        // Accede a los headers desde el objeto que emite el BehaviorSubject
+        const headers = headerObj.headers;
+        // Crea el objeto de opciones con los headers
+        const options = {
+          headers: headers
+        };
+        // Realiza la solicitud HTTP POST
+        return this.http.post<any>(`${this.path}${endpoint}`, element, options).pipe(
+          catchError(this.errManager.handleError.bind(this))
+        );
+      })
     );
   }
 
@@ -163,10 +119,24 @@ export class RequestManager {
    * @param element data to send as JSON, With the id to UPDATE
    * @returns Observable<any>
    */
-  put(endpoint: any, element: { Id: any; }) {
+  put(endpoint: any, element: { Id: any }): Observable<any> {
     const path = (element.Id) ? `${this.path}${endpoint}/${element.Id}` : `${this.path}${endpoint}`;
-    return this.http.put<any>(path, element, this.httpOptions).pipe(
-      catchError(this.errManager.handleError),
+
+    return this.header$.pipe(
+      mergeMap(headerObj => {
+        // Accede a los headers desde el objeto que emite el BehaviorSubject
+        const headers = headerObj.headers;
+
+        // Crea el objeto de opciones con los headers
+        const options = {
+          headers: headers
+        };
+
+        // Realiza la solicitud HTTP PUT
+        return this.http.put<any>(path, element, options).pipe(
+          catchError(this.errManager.handleError.bind(this))
+        );
+      })
     );
   }
 
@@ -176,9 +146,22 @@ export class RequestManager {
    * @param id element's id for remove
    * @returns Observable<any>
    */
-  delete(endpoint: any, id: any) {
-    return this.http.delete<any>(`${this.path}${endpoint}/${id}`, this.httpOptions).pipe(
-      catchError(this.errManager.handleError),
+  delete(endpoint: any, id: any): Observable<any> {
+    return this.header$.pipe(
+      mergeMap(headerObj => {
+        // Accede a los headers desde el objeto que emite el BehaviorSubject
+        const headers = headerObj.headers;
+
+        // Crea el objeto de opciones con los headers
+        const options = {
+          headers: headers
+        };
+
+        // Realiza la solicitud HTTP DELETE
+        return this.http.delete<any>(`${this.path}${endpoint}/${id}`, options).pipe(
+          catchError(this.errManager.handleError.bind(this))
+        );
+      })
     );
   }
 };
