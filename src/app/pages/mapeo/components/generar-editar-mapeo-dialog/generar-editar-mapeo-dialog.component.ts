@@ -14,6 +14,7 @@ import { PopUpManager } from 'src/app/managers/popUpManager';
 })
 export class GenerarEditarMapeoDialogComponent {
   tipo: string;
+  id_gedep: string;
   element: MapeoBusqueda;
 
   MapeoForm = new FormGroup({
@@ -46,6 +47,7 @@ export class GenerarEditarMapeoDialogComponent {
     private dependencias_service: Dependencias_service,
     private popUpManager: PopUpManager
   ) {
+    this.id_gedep = '';
     this.tipo = data.tipo;
     this.element = data.element;
     this.cargarDatosMapeoDependencia();
@@ -54,19 +56,24 @@ export class GenerarEditarMapeoDialogComponent {
 
   cargarDatosMapeoDependencia(){
     this.MapeoForm.get('nombre')?.setValue(this.element.nombre);
-    console.log("Id dependencia: " + String(this.element.nombre));
-    //PRUEBA MANIPULACIÓN XML
-    const xmlString = `<?xml version="1.0"?><response><name>John</name><age>30</age><city>New York</city></response>`;
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-    const name = xmlDoc.getElementsByTagName("name")[0].textContent;
-    const age = xmlDoc.getElementsByTagName("age")[0].textContent;
-    const city = xmlDoc.getElementsByTagName("city")[0].textContent;
-    console.log(`Name: ${name}, Age: ${age}, City: ${city}`);
-    //FIN MANIPULACIÓN XML
-    this.dependencias_service.get('mapeo_dependencia/'+this.element.idDependencia).subscribe((res:any)=>{
-      console.log("OBJETO :" +JSON.stringify(res, null, 2));
-    });
+    if (this.tipo != "GENERAR"){
+      this.dependencias_service.get('mapeo_dependencia/'+this.element.idDependencia).subscribe((res:any)=>{
+        let dataRes = res.mapeo_dependencias_pruebasCollection.mapeo_dependencias_pruebas;
+        dataRes = dataRes[0];
+        this.MapeoForm.controls['numIdInterno'].disable();
+        this.MapeoForm.get('idArgo')?.setValue(dataRes.id_argo);
+        this.MapeoForm.get('numIdInterno')?.setValue(dataRes.id_master);
+        this.MapeoForm.get('codSnies')?.setValue(dataRes.id_acad);
+        this.MapeoForm.get('codIris')?.setValue(dataRes.id_iris);
+        if(dataRes.id_gedep == null){
+          let temp = dataRes.id_argo;
+          temp = temp.split("P");
+          this.id_gedep = temp[1];
+        }else{
+          this.id_gedep = dataRes.id_gedep
+        }
+      });
+    }
   }
 
   gestorAccionTipo(){
@@ -78,38 +85,43 @@ export class GenerarEditarMapeoDialogComponent {
   }
 
   crearObjetoMapeo(){
+    this.MapeoForm.controls['numIdInterno'].enable();
     const valoresForm = this.MapeoForm.value;
-    let nomObjeto;
+    if(this.id_gedep == '' && valoresForm.idArgo){
+      let temp: any = valoresForm.idArgo;
+      temp = temp.split("P");
+      this.id_gedep = temp[1];
+    }else{
+      this.id_gedep = this.id_gedep;
+    }
     if (this.tipo == "GENERAR"){
       return {
-        _post_mapeo_dependencia:{
-          id_master: valoresForm.numIdInterno,
-          id_gedep:null,
+        _postmapeo_dependencia:{
+          id_master: Number(valoresForm.numIdInterno),
+          id_gedep: Number(this.id_gedep),
           id_argo: valoresForm.idArgo,
-          id_acad: valoresForm.codSnies,
-          id_iris: valoresForm.codIris
+          id_acad: Number(valoresForm.codSnies),
+          id_iris: Number(valoresForm.codIris)
         }
       }
     }else{
       return {
-        _update_mapeo_dependencia_id_master:{
-          id_master: valoresForm.numIdInterno,
-          id_gedep:null,
+        _putmapeo_dependencia_id_master:{
+          id_master: Number(valoresForm.numIdInterno),
+          id_gedep: Number(this.id_gedep),
           id_argo: valoresForm.idArgo,
-          id_acad: valoresForm.codSnies,
-          id_iris: valoresForm.codIris
+          id_acad: Number(valoresForm.codSnies),
+          id_iris: Number(valoresForm.codIris)
         }
       }
     }
   }
 
   creacionMapeoDependencia(){
-    console.log("CREO LA DEPENDENCIA");
-    console.log("OBJETO :" +JSON.stringify(this.MapeoForm.value, null, 2));
     const objMapeo = this.crearObjetoMapeo();
     this.dependencias_service.post('mapeo_dependencia', objMapeo).pipe(
       tap((res:any)=>{
-        if (res.Success){
+        if (res.mapeo_dependencias?.id_master){
           this.popUpManager.showSuccessAlert("Mapeo creado");
         } else{
           this.popUpManager.showErrorAlert("Error al crear mapeo");
@@ -125,12 +137,10 @@ export class GenerarEditarMapeoDialogComponent {
   }
 
   editarMapeoDependencia(){
-    console.log("EDITO LA DEPENDENCIA");
-    console.log("OBJETO :" +JSON.stringify(this.MapeoForm.value, null, 2));
     const objMapeo = this.crearObjetoMapeo();
-    this.dependencias_service.put('mapeo_dependencia', objMapeo).pipe(
+    this.dependencias_service.put('mapeo_dependencia/'+this.element.idDependencia, objMapeo).pipe(
       tap((res:any)=>{
-        if (res.Success){
+        if (res.mapeo_dependencias?.id_master){
           this.popUpManager.showSuccessAlert("Mapeo editado");
         } else{
           this.popUpManager.showErrorAlert("Error al editar mapeo");

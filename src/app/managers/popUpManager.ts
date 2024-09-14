@@ -11,17 +11,17 @@ export class PopUpManager {
     showSuccessAlert(text: string) {
         Swal.fire({
             icon: 'success',
-            title: 'operacion exitosa',
+            title: 'Operacion exitosa',
             text: text,
-            confirmButtonText: 'aceptar',
+            confirmButtonText: 'Aceptar',
         });
     }
     showErrorAlert(text: string) {
         Swal.fire({
             icon: 'error',
-            title: 'error',
+            title: 'Error',
             text: text,
-            confirmButtonText: 'aceptar',
+            confirmButtonText: 'Aceptar',
         });
     }
 }
