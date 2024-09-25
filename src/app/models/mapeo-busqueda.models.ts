@@ -1,5 +1,7 @@
+import { Desplegables } from "./desplegables.models";
+
 export interface MapeoBusqueda {
-    idDependencia: number;
+    id: number;
     nombre: string;
     dependenciasAsociadas: string;
     tipoDependencia: string[];
