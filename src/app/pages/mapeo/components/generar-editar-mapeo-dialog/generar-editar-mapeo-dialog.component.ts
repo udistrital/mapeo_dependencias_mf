@@ -57,7 +57,7 @@ export class GenerarEditarMapeoDialogComponent {
   cargarDatosMapeoDependencia(){
     this.MapeoForm.get('nombre')?.setValue(this.element.nombre);
     if (this.tipo != "GENERAR"){
-      this.dependencias_service.get('mapeo_dependencia/'+this.element.idDependencia).subscribe((res:any)=>{
+      this.dependencias_service.get('mapeo_dependencia/'+this.element.id).subscribe((res:any)=>{
         let dataRes = res.mapeo_dependencias_pruebasCollection.mapeo_dependencias_pruebas;
         dataRes = dataRes[0];
         this.MapeoForm.controls['numIdInterno'].disable();
@@ -138,7 +138,7 @@ export class GenerarEditarMapeoDialogComponent {
 
   editarMapeoDependencia(){
     const objMapeo = this.crearObjetoMapeo();
-    this.dependencias_service.put('mapeo_dependencia/'+this.element.idDependencia, objMapeo).pipe(
+    this.dependencias_service.put('mapeo_dependencia/'+this.element.id, objMapeo).pipe(
       tap((res:any)=>{
         if (res.mapeo_dependencias?.id_master){
           this.popUpManager.showSuccessAlert("Mapeo editado");
