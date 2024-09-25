@@ -1,7 +1,7 @@
 
 <mat-card>
     <div class="contenido-editar">
-        <mat-card-title class="titulo"> {{tipo}} MAPEO</mat-card-title> 
+        <mat-card-title class="titulo"> {{tipo}} {{ "GENERAR_MAPEO" | translate }}</mat-card-title> 
         <button class="boton-salir" (click)="onCloseClick()">x</button>
     </div>
     <mat-divider class="divider"></mat-divider>
@@ -9,29 +9,26 @@
         <form [formGroup]= "MapeoForm">
             <div class="grid">
                 <div class="left-column">
-                    <p class="nombre-input">NOMBRE DEPENCIA</p>
-                    <input type="text" readonly class="input-centrado" formControlName="nombre">
-                    <p class="nombre-input">IDENTIFICACION ARGO<button class="boton-ayuda">?   
-                        <span class="tooltip-text-mapeo">
-                        <p>• Es el identificador de id para el sistema de ARGO.</p>
-                    </span></button></p>
-                    <input type="text" formControlName="idArgo">
-                    <button class="boton-accion" (click)="gestorAccionTipo()">{{tipo}} MAPEO</button>
+                    <p class="nombre-input">{{ "FORMULARIO.NOMBRE_DEPENDENCIA" | translate }}</p>
+                    <input type="text" [value]="element.nombre" readonly class="input-centrado">
+                    <p class="nombre-input">{{ "FORMULARIO.ARGO" | translate }}</p>
+                    <input type="text">
+                    <button class="boton-accion">{{tipo}} {{ "GENERAR_MAPEO" | translate }}</button>
                 </div>
                 <div class="right-column">
-                    <p class="nombre-input">NÚMERO DE IDENTIFICACIÓN INTERNO<button class="boton-ayuda">?   
+                    <p class="nombre-input">{{ "FORMULARIO.NUMERO_IDENTIFICACION" | translate }}<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es el identificador master de OIKOS de la dependencia.</p>
+                        <p>{{ "TOOLTIP.NUMERO_IDENTIFICACION.PARTE_1" | translate }}</p>
                     </span></button></p>
-                    <input type="text" formControlName="numIdInterno">
-                    <p class="nombre-input">CODIGO SNIES<button class="boton-ayuda">?   
+                    <input type="text">
+                    <p class="nombre-input">{{ "FORMULARIO.SNIES" | translate }}<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es el número que el Ministerio de Educación Nacional le asigna a un programa acedemico de educación superior.</p>
+                        <p>{{ "TOOLTIP.SNIES.PARTE_1" | translate }}</p>
                     </span></button></p>
-                    <input type="text" formControlName="codSnies">
-                    <p class="nombre-input">CODIGO IRIS<button class="boton-ayuda">?   
+                    <input type="text">
+                    <p class="nombre-input">{{ "FORMULARIO.IRIS" | translate }}<button class="boton-ayuda">?   
                         <span class="tooltip-text-mapeo">
-                        <p>• Es el número que define un código para identificador en IRIS.</p>
+                        <p>{{ "TOOLTIP.IRIS.PARTE_1" | translate }}</p>
                     </span></button></p>
                     <input type="text" formControlName="codIris">
                 </div>
