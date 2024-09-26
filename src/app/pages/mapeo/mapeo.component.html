@@ -1,43 +1,44 @@
 <mat-card>
     <mat-card-content>
         <mat-card>
-            <mat-card-title class="titulo"> MAPEO DEPENDENCIAS</mat-card-title> 
+            
+            <mat-card-title class="titulo">{{ "MAPEO.TITULO" | translate }}</mat-card-title> 
             <mat-divider class="divider"></mat-divider>
             <mat-card-content>  
                 <mat-card>
                     <div class="contenido-gestion">
-                        <p class="left">* El mapeo de la información se hará para académica / administrativa.</p>
-                        <p class="right">* Dependiendo del tipo de dependencia, se pedirá código SNIES.</p>
+                        <p class="left">{{ "MAPEO.SUBTITULO_IZQ" | translate }}</p>
+                        <p class="right">{{ "MAPEO.SUBTITULO_DER" | translate }}</p>
                     </div>                    
                     <mat-divider class="divider"></mat-divider>
                     <mat-card-content>  
                         <form [formGroup]="gestionForm">
                             <div class="grid">
                                 <div class="left-column">
-                                    <p class="nombre-input">NOMBRE DEPENCIA 
+                                    <p class="nombre-input">{{ "FORMULARIO.NOMBRE_DEPENDENCIA" | translate }}
                                         <button class="boton-ayuda">?   
                                             <span class="tooltip-text">
-                                                <p>• El nombre de la dependencia debe ir en mayusculas.</p>
-                                                <p>• Sin tildes.</p>
+                                                <p>{{ "TOOLTIP.NOMBRE_DEPENDENCIA.PARTE_1" | translate }}</p>
+                                                <p>{{ "TOOLTIP.NOMBRE_DEPENDENCIA.PARTE_2" | translate }}</p>
                                             </span>
                                         </button> 
                                     </p>
                                     <input type="text" formControlName="nombre">
-                                    <p class="nombre-input">TIPO DEPENCIA </p>
+                                    <p class="nombre-input">{{ "FORMULARIO.TIPO_DEPENDENCIA" | translate }}</p>
                                     <select formControlName="tipoDependencia">
                                         <option>...</option>
                                         <option *ngFor="let item of tiposDependencia" [ngValue]="item">
                                             {{item.nombre}}
                                         </option>
                                     </select>
-                                    <button class="boton-accion" (click)="buscarDependencias()">BUSCAR</button>
+                                    <button class="boton-accion" (click)="buscarDependencias()">{{ "FORMULARIO.BUSCAR" | translate }}</button>
                                 </div>
                                 <div class="right-column">
-                                    <p class="nombre-input">FACULTADES 
+                                    <p class="nombre-input">{{ "FORMULARIO.FACULTAD" | translate }}
                                         <button class="boton-ayuda">?   
                                             <span class="tooltip-text">
-                                                <p>• El nombre de la Facultad debe ir en mayusculas.</p>
-                                                <p>• Sin tildes.</p>
+                                                <p>{{ "TOOLTIP.FACULTAD.PARTE_1" | translate }}</p>
+                                                <p>{{ "TOOLTIP.FACULTAD.PARTE_2" | translate }}</p>
                                             </span>
                                         </button> 
                                     </p>
@@ -48,11 +49,11 @@
                                         </option>
                                     </select>
                                     
-                                    <p class="nombre-input">VICERECTORIA 
+                                    <p class="nombre-input">{{ "FORMULARIO.VICERRECTORIA" | translate }}
                                         <button class="boton-ayuda">?   
                                             <span class="tooltip-text">
-                                                <p>• El nombre de la Vicerectoria debe ir en mayusculas.</p>
-                                                <p>• Sin tildes.</p>
+                                                <p>{{ "TOOLTIP.VICERRECTORIA.PARTE_1" | translate }}</p>
+                                                <p>{{ "TOOLTIP.VICERRECTORIA.PARTE_2" | translate }}</p>
                                             </span>
                                         </button> 
                                     </p>
@@ -62,11 +63,11 @@
                                             {{item.nombre}}
                                         </option>
                                     </select>
-                                    <p class="nombre-input">ESTADO </p>
+                                    <p class="nombre-input">{{ "FORMULARIO.ESTADO" | translate }}</p>
                                     <select formControlName="estado">
                                         <option>...</option>
-                                        <option>ACTIVO</option>
-                                        <option>NO ACTIVO</option>
+                                        <option>{{ "FORMULARIO.ESTADO_OPCIONES.ACTIVO" | translate }}</option>
+                                        <option>{{ "FORMULARIO.ESTADO_OPCIONES.NO_ACTIVO" | translate }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -82,23 +83,27 @@
                         <ng-container *ngIf="mostrarTabla && !cargando">
                             <table  mat-table [dataSource]="datos" class="mat-elevation-z8 tabla-gestion">
                                 <ng-container matColumnDef="NOMBRE">
-                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla" > NOMBRE </th>
+                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla" >{{ "TABLA.COLUMNAS.NOMBRE" | translate }}</th>
                                     <td mat-cell *matCellDef="let element" class="contenido-celda"> {{element.nombre}}</td>
                                 </ng-container>
                                 <ng-container matColumnDef="DEPENDENCIA ASOCIADAS">
-                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla"> DEPENDENCIAS ASOCIADAS </th>
-                                    <td mat-cell *matCellDef="let element" class="contenido-celda"> {{element.dependenciasAsociadas}} </td>
+                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla">{{ "TABLA.COLUMNAS.DEPENDENCIAS_ASOCIADAS" | translate }}</th>
+                                    <td mat-cell *matCellDef="let element" class="contenido-celda"> {{element.dependenciasAsociadas.nombre}} </td>
                                 </ng-container>
                                 <ng-container matColumnDef="TIPO">
-                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla"> TIPO </th>
-                                    <td mat-cell *matCellDef="let element" class="contenido-celda"> {{element.tipoDependencia}} </td>
+                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla">{{ "TABLA.COLUMNAS.TIPO" | translate }}</th>
+                                    <td mat-cell *matCellDef="let element" class="contenido-celda"> 
+                                        <ng-container *ngFor="let tipo of element.tipoDependencia">
+                                            {{tipo.nombre}},
+                                        </ng-container>
+                                    </td>
                                 </ng-container>
                                 <ng-container matColumnDef="ACCIONES">
-                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla"> ACCIONES </th>
+                                    <th mat-header-cell *matHeaderCellDef class="titulo-tabla">{{ "TABLA.COLUMNAS.ACCIONES" | translate }}</th>
                                     <td mat-cell *matCellDef="let element" class="contenido-celda"> 
                                         <span >
-                                            <mat-icon class="icono-rojo" (click)="abrirDialogGenerarEditarMapeo('EDITAR', element)">edit</mat-icon>
-                                            <mat-icon class="icono-rojo" (click)="abrirDialogGenerarEditarMapeo('GENERAR', element)">check</mat-icon>
+                                            <mat-icon class="icono-rojo" (click)="abrirDialogGenerarEditarMapeo('EDITAR', element)">{{ "ACCIONES.EDITAR" | translate }}</mat-icon>
+                                            <mat-icon class="icono-rojo" (click)="abrirDialogGenerarEditarMapeo('GENERAR', element)">{{ "ACCIONES.ACEPTAR" | translate }}</mat-icon>
                                         </span>
                                     </td>
                                 </ng-container>

@@ -8,7 +8,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Desplegables } from 'src/app/models/desplegables.models';
 import { OikosService } from '../../services/oikos.service';
 import { OikosMidService } from '../../services/oikos_mid.service';
-
+import { PopUpManager } from '../../managers/popUpManager'
+// @ts-ignore
+import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-mapeo',
@@ -25,29 +30,7 @@ export class MapeoComponent {
   mostrarTabla: boolean = false;
   cargando: boolean = false; // <-- Variable para el loader
   columnasBusqueda = signal<string[]>(["NOMBRE","DEPENDENCIA ASOCIADAS","TIPO","ACCIONES"]);
-  gestionForm = new FormGroup({
-    nombre: new FormControl("", {
-      nonNullable: false,
-      validators: [Validators.required]
-    }),
-    tipoDependencia: new FormControl<Desplegables | null>(null, {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    facultad: new FormControl<Desplegables | null>(null, {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    vicerrectoria: new FormControl<Desplegables | null>(null, {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    estado: new FormControl<string | null>(null, {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-  });
-
+  gestionForm !:  FormGroup;
   elementosBusqueda = signal<MapeoBusqueda[]>([]);
   datos = new MatTableDataSource<MapeoBusqueda>();
 
@@ -57,15 +40,66 @@ export class MapeoComponent {
     private oikosService: OikosService,
     public dialog: MatDialog,
     private oikosMidService: OikosMidService,
+    private popUpManager: PopUpManager,
+    private translate: TranslateService,
   ) {
+    translate.setDefaultLang('es');
     this.cargarTiposDependencia();
     this.cargarFacultades();
     this.cargarVicerrectorias();
   }
-  
+
+  ngOnInit() {
+    this.iniciarFormularioConsulta();
+    this.gestionForm.get('facultad')?.valueChanges.subscribe((selectedFacultad) => {
+      if (selectedFacultad) {
+        this.gestionForm.get('vicerrectoria')?.setValue(null);
+        this.gestionForm.get('tipoDependencia')?.setValue(null);
+      }
+    });
+    this.gestionForm.get('vicerrectoria')?.valueChanges.subscribe((selectedVicerrectoria) => {
+      if (selectedVicerrectoria) {
+        this.gestionForm.get('facultad')?.setValue(null);
+        this.gestionForm.get('tipoDependencia')?.setValue(null);
+      }
+    });
+    this.gestionForm.get('tipoDependencia')?.valueChanges.subscribe((selectedTipoDependencia) => {
+      if (selectedTipoDependencia) {
+        this.gestionForm.get('facultad')?.setValue(null);
+        this.gestionForm.get('vicerrectoria')?.setValue(null);
+      }
+    });
+  }
+
   ngAfterViewInit(){
     this.datos.paginator = this.paginator;
   }
+
+  iniciarFormularioConsulta(){
+    this.gestionForm = new FormGroup({
+      nombre: new FormControl("", {
+        nonNullable: false,
+        validators: [Validators.required]
+      }),
+      tipoDependencia: new FormControl<Desplegables | null>(null, {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+      facultad: new FormControl<Desplegables | null>(null, {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+      vicerrectoria: new FormControl<Desplegables | null>(null, {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+      estado: new FormControl<string | null>(null, {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+    });
+  }
+
 
   cargarTiposDependencia() {
     this.oikosService.get('tipo_dependencia?limit=-1').subscribe((res: any) => {
@@ -146,37 +180,52 @@ export class MapeoComponent {
     return busqueda;
   }
 
-  buscarDependencias() {
-    const busqueda = this.construirBusqueda();
-    console.log(busqueda);
+   buscarDependencias() {
+    const busqueda = this.construirBusqueda();  
+    console.log(busqueda)
+    this.popUpManager.showLoaderAlert();
+    this.mostrarTabla = false;  
 
-    this.cargando = true; 
-
-    this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).subscribe(
-      (res: any) => {
-        const datosTransformados = res.Data.map((item: any) => ({
-          idDependencia: item.Dependencia.Id,
-          nombre: item.Dependencia.Nombre,
-          dependenciasAsociadas: item.DependenciaAsociada?.Nombre,
-          tipoDependencia: item.TipoDependencia.map((tipo: any) => tipo.Nombre),
-        }));
-        console.log(datosTransformados)
-
-        this.elementosBusqueda.set(datosTransformados);
-        this.datos.data = this.elementosBusqueda();
-
-        if (this.paginator) {
-          this.datos.paginator = this.paginator;
+    this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).pipe(
+      tap((res: any) => {
+        if (res && res.Data) {
+          const datosTransformados = res.Data.map((item: any) => ({
+            id: item.Dependencia.Id,
+            nombre: item.Dependencia.Nombre,
+            telefono: item.Dependencia.TelefonoDependencia,
+            correo: item.Dependencia.CorreoElectronico,
+            dependenciasAsociadas: {
+              id: item.DependenciaAsociada.Id,          
+              nombre: item.DependenciaAsociada.Nombre
+            },
+            tipoDependencia: item.TipoDependencia.map((tipo: any) => ({
+              id: tipo.Id,          
+              nombre: tipo.Nombre   
+            })),
+            estado: item.Estado ? 'ACTIVA' : 'NO ACTIVA',
+          }));
+          
+          this.datos = new MatTableDataSource<MapeoBusqueda>(datosTransformados);
+          setTimeout(() => { this.datos.paginator = this.paginator; }, 1000);
+          
+          Swal.close();
+          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.BUSQUEDA'));
+          this.mostrarTabla = true;  
+        } else {
+          Swal.close();
+          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.DATOS'));
+          this.mostrarTabla = false;
         }
+      }),
+      catchError((error) => {
+        Swal.close();
+        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.BUSQUEDA') + (error.message || 'Error desconocido'));
+        console.error('Error al buscar dependencias:', error);
+        this.mostrarTabla = false;
+        return of(null);  
+      })
+    ).subscribe();
+}
 
-        this.cargando = false; 
-      },
-      (error) => {
-        console.error('Error al buscar dependencias', error);
-        this.cargando = false; 
-      }
-    );
-    this.mostrarTabla = true;
-  }
-
+  
 }
