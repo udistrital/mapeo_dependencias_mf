@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'mapeo'`, () => {
+  it(`should have as title 'mapeo-dependencias-mf'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('mapeo');
+    expect(app.title).toEqual('mapeo-dependencias-mf');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('mapeo app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain('mapeo-dependencias-mf app is running!');
   });
 });
