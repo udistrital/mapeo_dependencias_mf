@@ -36,9 +36,6 @@ export class RequestManager {
           'Authorization': `Bearer ${acces_token}`,
         }),
       });
-      console.log("ENTRA")
-      //const headers = this.httpOptions.headers.keys().map((key:string) => ({ [key]: this.httpOptions.headers.get(key) }));
-      console.log("CREACION HTTP HEADER:");
     }
   }
 

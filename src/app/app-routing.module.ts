@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes, provideRouter } from '@angular/router';
-import { getSingleSpaExtraProviders } from 'single-spa-angular';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { RouterModule, Routes } from '@angular/router';
+import { MapeoComponent } from './pages/mapeo/mapeo.component';
+import { APP_BASE_HREF } from '@angular/common';
 
 const routes: Routes = [
   {
-    path: '',
-    loadChildren: () => import('./pages/pages.module')
-      .then(m => m.PagesModule),
+    path: "mapeo",
+    component: MapeoComponent
   },
+  {
+    path: "**",
+    redirectTo: "registro"
+  }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  providers: [ 
-    provideRouter(routes),
-    getSingleSpaExtraProviders(),
-    provideHttpClient(withFetch()) ]
+  providers: [{ provide: APP_BASE_HREF, useValue: "/"}]
 })
 export class AppRoutingModule { }
