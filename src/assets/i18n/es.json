@@ -26,6 +26,10 @@
       },
       "IRIS":{
         "PARTE_1":"• Es el número que el Ministerio de Educación le asigna a un programa académico de educación superior."
+      },
+      "ACCIONES":{
+        "EDITAR":"Editar Mapeo",
+        "GENERAR":"Genear Mapeo"
       }
     },
     "FORMULARIO": {

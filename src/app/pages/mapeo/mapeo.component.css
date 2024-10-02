@@ -58,7 +58,7 @@
     border-collapse: collapse;
     border-radius: 3px; 
     font-family: Helvetica, Arial, sans-serif;
-    overflow: hidden; 
+    overflow: visible;  
 }
 
 .titulo-tabla th {
@@ -75,6 +75,8 @@
     padding: 10px;
     text-align: center;
     border: 1px solid #000; 
+    position: relative;
+    overflow: visible;
 }
 
 .contenido-celda {
@@ -93,4 +95,18 @@ th.mat-sort-header-sorted {
     height: auto;
     cursor: pointer;
     margin-right: 10%;
+}
+
+.tooltip-bottom {
+    z-index: 1000;
+}
+
+.boton-acciones{
+    position: relative;
+    display: inline-block;
+}
+
+.boton-acciones:hover .tooltip{
+    visibility: visible;
+    opacity: 1;
 }
