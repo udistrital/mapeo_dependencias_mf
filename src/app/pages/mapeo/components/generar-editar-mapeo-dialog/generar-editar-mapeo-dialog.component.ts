@@ -52,7 +52,6 @@ export class GenerarEditarMapeoDialogComponent {
     this.element = data.element;
     this.cargarDatosMapeoDependencia();
   }
-  
 
   cargarDatosMapeoDependencia(){
     this.MapeoForm.get('nombre')?.setValue(this.element.nombre);

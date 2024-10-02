@@ -38,42 +38,6 @@
     justify-content: space-between;
 }
 
-
-.tooltip-text-mapeo {
-    font-family: Helvetica;
-    width: 300px;
-    height: min-content;
-    background-color: #FFF2CC; 
-    border: 1px solid #D6B656; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    border-radius: 6px;
-    padding: 10px;
-    position: absolute;
-    z-index: 1; 
-    font-size: 14px; 
-    line-height: 1.5;
-    white-space: pre-wrap;
-    text-align: left;
-    opacity: 0;
-    visibility: hidden;
-    top: 50%;
-    right: calc(100% + 5px);
-    margin-left: 5px;
-    transform: translateY(-50%);
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.left-column .tooltip-text-mapeo{
-    left: calc(100% + 5px);
-}
-
-.boton-ayuda:hover .tooltip-text-mapeo{
-    visibility: visible;
-    opacity: 1;
-}
-
-
 .boton-accion{
     padding-right: 10%;
     padding-left: 10%;
