@@ -183,7 +183,7 @@ export class MapeoComponent {
    buscarDependencias() {
     const busqueda = this.construirBusqueda();  
     console.log(busqueda)
-    this.popUpManager.showLoaderAlert();
+    this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.BUSQUEDA'));
     this.mostrarTabla = false;  
 
     this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).pipe(

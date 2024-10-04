@@ -24,9 +24,9 @@ export class PopUpManager {
             confirmButtonText: 'Aceptar',
         });
     }
-    showLoaderAlert(){
+    showLoaderAlert(text: string){
         Swal.fire({
-            title: 'Obteniendo datos...',
+            title: text,
             allowEscapeKey: false,
             allowOutsideClick: false,
             timer: 2000,

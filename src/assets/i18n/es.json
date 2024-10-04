@@ -60,14 +60,23 @@
       }
     },
     "EXITO": {
-        "BUSQUEDA": "Datos cargados con éxito"
+        "BUSQUEDA": "Datos cargados con éxito",
+        "GENERAR_MAPEO":"Mapeo creado",
+        "EDITAR_MAPEO":"Mapeo editado"
     },
     "ERROR":{
         "BUSQUEDA":{
             "DATOS":"Error al buscar dependencias: Datos no disponibles",
             "BUSQUEDA":"Error al buscar dependencias: "
         },
-        "DESCONOCIDO":"Error desconocido"
+        "DESCONOCIDO":"Error desconocido",
+        "GENERAR_MAPEO":"Error al crear mapeo",
+        "EDITAR_MAPEO":"Error al editar mapeo"
+    },
+    "CARGA":{
+      "BUSQUEDA":"Obteniendo datos...",
+      "GENERAR_MAPEO":"Creando mapeo...",
+      "EDITAR_MAPEO":"Editando mapeo..."
     },
     "ACCIONES": {
       "EDITAR": "edit",
