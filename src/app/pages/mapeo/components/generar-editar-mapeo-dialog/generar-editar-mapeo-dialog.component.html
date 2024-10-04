@@ -15,8 +15,8 @@
                         <span class="tooltip tooltip-right">
                         <p>{{ "TOOLTIP.ARGO.PARTE_1" | translate }}</p>
                     </span></button></p>
-                    <input type="text">
-                    <button class="boton-accion">{{tipo}} {{ "GENERAR_MAPEO" | translate }}</button>
+                    <input type="text" formControlName="idArgo">
+                    <button class="boton-accion" (click)="gestorAccionTipo()">{{tipo}} {{ "GENERAR_MAPEO" | translate }}</button>
                 </div>
                 <div class="right-column">
                     <p class="nombre-input">{{ "FORMULARIO.NUMERO_IDENTIFICACION" | translate }}<button class="boton-ayuda">?
