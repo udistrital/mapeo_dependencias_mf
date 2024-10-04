@@ -6,7 +6,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Dependencias_service } from 'src/app/services/dependencias.service';
 import { catchError, of, tap } from 'rxjs';
 import { PopUpManager } from 'src/app/managers/popUpManager';
-
+// @ts-ignore
+import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-generar-editar-mapeo-dialog',
   templateUrl: './generar-editar-mapeo-dialog.component.html',
@@ -45,8 +47,10 @@ export class GenerarEditarMapeoDialogComponent {
     public dialogRef: MatDialogRef<GenerarEditarMapeoDialogComponent>,
     private oikosmid: OikosMidService,
     private dependencias_service: Dependencias_service,
-    private popUpManager: PopUpManager
+    private popUpManager: PopUpManager,
+    private translate: TranslateService,
   ) {
+    translate.setDefaultLang('es');
     this.id_gedep = '';
     this.tipo = data.tipo;
     this.element = data.element;
@@ -117,18 +121,22 @@ export class GenerarEditarMapeoDialogComponent {
   }
 
   creacionMapeoDependencia(){
+    this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.GENERAR_MAPEO'));
     const objMapeo = this.crearObjetoMapeo();
     this.dependencias_service.post('mapeo_dependencia', objMapeo).pipe(
       tap((res:any)=>{
         if (res.mapeo_dependencias?.id_master){
-          this.popUpManager.showSuccessAlert("Mapeo creado");
+          Swal.close();
+          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.GENERAR_MAPEO'));
         } else{
-          this.popUpManager.showErrorAlert("Error al crear mapeo");
+          Swal.close();
+          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO'));
         }
       }),
       catchError((error)=>{
         console.error('Error en la solicitud', error);
-        this.popUpManager.showErrorAlert("Error al crear mapeo: "+ (error.message || 'Error desconocido'));
+        Swal.close();
+        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.DESCONOCIDO')));
         return of(null);
       })
     ).subscribe();
@@ -136,18 +144,22 @@ export class GenerarEditarMapeoDialogComponent {
   }
 
   editarMapeoDependencia(){
+    this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.EDITAR_MAPEO'));
     const objMapeo = this.crearObjetoMapeo();
     this.dependencias_service.put('mapeo_dependencia/'+this.element.id, objMapeo).pipe(
       tap((res:any)=>{
         if (res.mapeo_dependencias?.id_master){
-          this.popUpManager.showSuccessAlert("Mapeo editado");
+          Swal.close();
+          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.EDITAR_MAPEO'));
         } else{
-          this.popUpManager.showErrorAlert("Error al editar mapeo");
+          Swal.close();
+          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO'));
         }
       }),
       catchError((error)=>{
         console.error('Error en la solicitud', error);
-        this.popUpManager.showErrorAlert("Error al editar mapeo: "+ (error.message || 'Error desconocido'));
+        Swal.close();
+        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.EDITAR_MAPEO')));
         return of(null);
       })
     ).subscribe();
