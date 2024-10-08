@@ -121,49 +121,57 @@ export class GenerarEditarMapeoDialogComponent {
   }
 
   creacionMapeoDependencia(){
-    this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.GENERAR_MAPEO'));
-    const objMapeo = this.crearObjetoMapeo();
-    this.dependencias_service.post('mapeo_dependencia', objMapeo).pipe(
-      tap((res:any)=>{
-        if (res.mapeo_dependencias?.id_master){
-          Swal.close();
-          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.GENERAR_MAPEO'));
-        } else{
-          Swal.close();
-          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO'));
-        }
-      }),
-      catchError((error)=>{
-        console.error('Error en la solicitud', error);
-        Swal.close();
-        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.DESCONOCIDO')));
-        return of(null);
-      })
-    ).subscribe();
-    this.dialogRef.close();
+    this.popUpManager.showConfirmAlert(this.translate.instant('CONFIRMACION.GENERAR_MAPEO.PREGUNTA'),this.translate.instant('CONFIRMACION.GENERAR_MAPEO.CONFIRMAR'),this.translate.instant('CONFIRMACION.GENERAR_MAPEO.DENEGAR')).then((result) =>{
+      if (result === true){
+        this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.GENERAR_MAPEO'));
+        const objMapeo = this.crearObjetoMapeo();
+        this.dependencias_service.post('mapeo_dependencia', objMapeo).pipe(
+          tap((res:any)=>{
+            if (res.mapeo_dependencias?.id_master){
+              Swal.close();
+              this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.GENERAR_MAPEO'));
+            } else{
+              Swal.close();
+              this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO'));
+            }
+          }),
+          catchError((error)=>{
+            console.error('Error en la solicitud', error);
+            Swal.close();
+            this.popUpManager.showErrorAlert(this.translate.instant('ERROR.GENERAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.DESCONOCIDO')));
+            return of(null);
+          })
+        ).subscribe();
+        this.dialogRef.close();
+      }
+    })
   }
 
   editarMapeoDependencia(){
-    this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.EDITAR_MAPEO'));
-    const objMapeo = this.crearObjetoMapeo();
-    this.dependencias_service.put('mapeo_dependencia/'+this.element.id, objMapeo).pipe(
-      tap((res:any)=>{
-        if (res.mapeo_dependencias?.id_master){
-          Swal.close();
-          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.EDITAR_MAPEO'));
-        } else{
-          Swal.close();
-          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO'));
-        }
-      }),
-      catchError((error)=>{
-        console.error('Error en la solicitud', error);
-        Swal.close();
-        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.EDITAR_MAPEO')));
-        return of(null);
-      })
-    ).subscribe();
-    this.dialogRef.close();
+    this.popUpManager.showConfirmAlert(this.translate.instant('CONFIRMACION.EDITAR_MAPEO.PREGUNTA'),this.translate.instant('CONFIRMACION.EDITAR_MAPEO.CONFIRMAR'),this.translate.instant('CONFIRMACION.EDITAR_MAPEO.DENEGAR')).then((result) =>{
+      if (result === true){
+        this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.EDITAR_MAPEO'));
+        const objMapeo = this.crearObjetoMapeo();
+        this.dependencias_service.put('mapeo_dependencia/'+this.element.id, objMapeo).pipe(
+          tap((res:any)=>{
+            if (res.mapeo_dependencias?.id_master){
+              Swal.close();
+              this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.EDITAR_MAPEO'));
+            } else{
+              Swal.close();
+              this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO'));
+            }
+          }),
+          catchError((error)=>{
+            console.error('Error en la solicitud', error);
+            Swal.close();
+            this.popUpManager.showErrorAlert(this.translate.instant('ERROR.EDITAR_MAPEO') + ":" + (error.message || this.translate.instant('ERROR.EDITAR_MAPEO')));
+            return of(null);
+          })
+        ).subscribe();
+        this.dialogRef.close();
+      }
+    })
   }
 
   onCloseClick(){

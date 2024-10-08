@@ -81,6 +81,32 @@
     "ACCIONES": {
       "EDITAR": "edit",
       "ACEPTAR": "check"
+    },
+    "CONFIRMACION":{
+      "EDITAR_MAPEO":{
+        "PREGUNTA":"¿Desea editar el mapeo de la dependencia?",
+        "CONFIRMAR":"EDITAR",
+        "DENEGAR":"NO EDITAR"
+      },
+      "GENERAR_MAPEO":{
+        "PREGUNTA":"¿Desea generar el mapeo de la dependencia?",
+        "CONFIRMAR":"MAPEAR",
+        "DENEGAR":"NO MAPEAR"
+      },
+      "CANCELAR":"CANCELAR",
+      "DENEGACION":"Los cambios no fueron guardados"
+    },
+    "POP_UP":{
+      "ICONO":{
+        "ERROR":"error",
+        "INFO":"info",
+        "EXITO":"success"
+      },
+      "TITULO":{
+        "EXITO":"Operación exitosa",
+        "ERROR":"Error"
+      },
+      "CONFIRMACION":"Aceptar"
     }
   }
   
