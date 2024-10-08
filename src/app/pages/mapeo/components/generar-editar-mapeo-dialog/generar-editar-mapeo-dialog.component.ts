@@ -59,13 +59,15 @@ export class GenerarEditarMapeoDialogComponent {
 
   cargarDatosMapeoDependencia(){
     this.MapeoForm.get('nombre')?.setValue(this.element.nombre);
+    this.MapeoForm.get('numIdInterno')?.setValue(String(this.element.id));
+    this.MapeoForm.controls['numIdInterno'].disable();
     if (this.tipo != "GENERAR"){
       this.dependencias_service.get('mapeo_dependencia/'+this.element.id).subscribe((res:any)=>{
         let dataRes = res.mapeo_dependencias_pruebasCollection.mapeo_dependencias_pruebas;
         dataRes = dataRes[0];
-        this.MapeoForm.controls['numIdInterno'].disable();
+        // this.MapeoForm.controls['numIdInterno'].disable();
         this.MapeoForm.get('idArgo')?.setValue(dataRes.id_argo);
-        this.MapeoForm.get('numIdInterno')?.setValue(dataRes.id_master);
+        // this.MapeoForm.get('numIdInterno')?.setValue(dataRes.id_master);
         this.MapeoForm.get('codSnies')?.setValue(dataRes.id_acad);
         this.MapeoForm.get('codIris')?.setValue(dataRes.id_iris);
         if(dataRes.id_gedep == null){
