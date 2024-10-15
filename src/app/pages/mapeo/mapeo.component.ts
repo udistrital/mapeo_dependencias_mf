@@ -194,10 +194,10 @@ export class MapeoComponent {
             nombre: item.Dependencia.Nombre,
             telefono: item.Dependencia.TelefonoDependencia,
             correo: item.Dependencia.CorreoElectronico,
-            dependenciasAsociadas: {
+            dependenciasAsociadas: item.DependenciaAsociada ? {
               id: item.DependenciaAsociada.Id,          
               nombre: item.DependenciaAsociada.Nombre
-            },
+            } : null,
             tipoDependencia: item.TipoDependencia.map((tipo: any) => ({
               id: tipo.Id,          
               nombre: tipo.Nombre   
