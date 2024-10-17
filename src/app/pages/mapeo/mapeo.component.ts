@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, signal} from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild, signal} from '@angular/core';
 import { MapeoBusqueda } from './../../models/mapeo-busqueda.models'
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -12,7 +12,7 @@ import { PopUpManager } from '../../managers/popUpManager'
 // @ts-ignore
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -20,7 +20,7 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './mapeo.component.html',
   styleUrls: ['./mapeo.component.css']
 })
-export class MapeoComponent {
+export class MapeoComponent implements OnInit, AfterViewInit  {
   @Input('normalform') normalform: any;
   @ViewChild(MatPaginator) paginator !: MatPaginator;
   
@@ -171,61 +171,95 @@ export class MapeoComponent {
       busqueda.VicerrectoriaId = this.gestionForm.value.vicerrectoria.id;
     }
 
-    if (this.gestionForm.value.estado !== '...') {
-      busqueda.BusquedaEstado = {
-        Estado: this.gestionForm.value.estado === "ACTIVO"
-      };
+    if (this.gestionForm.value.estado) {
+      if ( this.gestionForm.value.estado != '...'){
+        busqueda.BusquedaEstado = {
+          Estado: this.gestionForm.value.estado === "ACTIVO"
+        };
+      }
     }
 
     return busqueda;
   }
 
-   buscarDependencias() {
-    const busqueda = this.construirBusqueda();  
-    console.log(busqueda)
+  buscarDependencias() {
+    const busqueda = this.construirBusqueda();
+    
+    if (Object.keys(busqueda).length !== 0) {
+      this.busqueda(busqueda).then((resultadosParciales) => {
+        this.procesarResultados(resultadosParciales);
+      });
+    } else {
+      const busquedaActiva = {
+        BusquedaEstado: {
+          Estado: true
+        }
+      };
+      const busquedaInactiva = {
+        BusquedaEstado: {
+          Estado: false
+        }
+      };
+      
+      this.busqueda(busquedaActiva).then((resultadosActivos) => {
+        this.busqueda(busquedaInactiva).then((resultadosInactivos) => {
+          const resultadosTotales = [...resultadosActivos, ...resultadosInactivos];
+          this.procesarResultados(resultadosTotales);
+        });
+      });
+    }
+  }
+  
+
+  busqueda(busqueda: any): Promise<any[]> {
     this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.BUSQUEDA'));
     this.mostrarTabla = false;  
-
-    this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).pipe(
-      tap((res: any) => {
-        if (res && res.Data) {
-          const datosTransformados = res.Data.map((item: any) => ({
-            id: item.Dependencia.Id,
-            nombre: item.Dependencia.Nombre,
-            telefono: item.Dependencia.TelefonoDependencia,
-            correo: item.Dependencia.CorreoElectronico,
-            dependenciasAsociadas: item.DependenciaAsociada ? {
-              id: item.DependenciaAsociada.Id,          
-              nombre: item.DependenciaAsociada.Nombre
-            } : null,
-            tipoDependencia: item.TipoDependencia.map((tipo: any) => ({
-              id: tipo.Id,          
-              nombre: tipo.Nombre   
-            })),
-            estado: item.Estado ? 'ACTIVA' : 'NO ACTIVA',
-          }));
-          
-          this.datos = new MatTableDataSource<MapeoBusqueda>(datosTransformados);
-          setTimeout(() => { this.datos.paginator = this.paginator; }, 1000);
-          
+    return new Promise((resolve, reject) => {
+      this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).pipe(
+        tap((res: any) => {
+          if (res && res.Data) {
+            const datosTransformados = res.Data.map((item: any) => ({
+              id: item.Dependencia.Id,
+              nombre: item.Dependencia.Nombre,
+              telefono: item.Dependencia.TelefonoDependencia,
+              correo: item.Dependencia.CorreoElectronico,
+              dependenciasAsociadas: item.DependenciaAsociada ? {
+                id: item.DependenciaAsociada.Id,
+                nombre: item.DependenciaAsociada.Nombre
+              }: null,
+              tipoDependencia: item.TipoDependencia.map((tipo: any) => ({
+                id: tipo.Id,
+                nombre: tipo.Nombre,
+              })),
+              estado: item.Estado ? 'ACTIVA' : 'NO ACTIVA',
+            }));
+            resolve(datosTransformados);
+          } else {
+            resolve([]); 
+          }
+        }),
+        catchError((error) => {
           Swal.close();
-          this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.BUSQUEDA'));
-          this.mostrarTabla = true;  
-        } else {
-          Swal.close();
-          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.DATOS'));
+          this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.BUSQUEDA') + (error.message || this.translate.instant('ERROR.DESCONOCIDO')));
           this.mostrarTabla = false;
-        }
-      }),
-      catchError((error) => {
-        Swal.close();
-        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.BUSQUEDA') + (error.message || 'Error desconocido'));
-        console.error('Error al buscar dependencias:', error);
-        this.mostrarTabla = false;
-        return of(null);  
-      })
-    ).subscribe();
-}
+          reject(error); 
+          return of(null);
+        })
+      ).subscribe();
+    });
+  }
 
-  
+
+  procesarResultados(resultados: any[]) {
+    if (resultados.length > 0) {
+      this.datos = new MatTableDataSource<MapeoBusqueda>(resultados);
+      setTimeout(() => { this.datos.paginator = this.paginator; }, 1000);
+      this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.BUSQUEDA'));
+      this.mostrarTabla = true;  
+    } else {
+      this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.DATOS'));
+      this.mostrarTabla = false;
+    }
+  }
+
 }
