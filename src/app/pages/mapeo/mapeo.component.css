@@ -50,6 +50,8 @@
     margin-left: 0px;
     padding-left: 20%;
     padding-right: 20%;
+    font-weight: bold;
+    background-color: #8C1A18;
 }
 
 
@@ -62,12 +64,13 @@
 }
 
 .titulo-tabla th {
-    background-color: #F8CECC; 
+    background-color: #8C1A18; 
     padding: 10px;
     text-align: center;
     border: 1px solid #000; 
     font-weight: bold;
-    font-family: Helvetica
+    font-family: Helvetica;
+    color: white
 }
 
 
