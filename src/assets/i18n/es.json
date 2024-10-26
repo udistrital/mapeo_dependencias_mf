@@ -71,7 +71,8 @@
         },
         "DESCONOCIDO":"Error desconocido",
         "GENERAR_MAPEO":"Error al crear mapeo",
-        "EDITAR_MAPEO":"Error al editar mapeo"
+        "EDITAR_MAPEO":"Error al editar mapeo",
+        "ROL": "El usuario no cuenta con permisos"
     },
     "CARGA":{
       "BUSQUEDA":"Obteniendo datos...",
