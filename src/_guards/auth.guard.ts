@@ -11,7 +11,9 @@ export class AuthGuard implements CanActivate {
   constructor(
     private popUpManager: PopUpManager,
     private translate: TranslateService,
-  ) {}
+  ) {
+    translate.setDefaultLang('es');
+  }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const menuInfo = localStorage.getItem('menu');
@@ -28,8 +30,11 @@ export class AuthGuard implements CanActivate {
         return true;
       }
     }
+    this.translate.get('POP_UP.ICONO.ERROR').subscribe(icon => {
+      this.popUpManager.showErrorAlert(this.translate.instant('ERROR.ROL'));
+    });
 
-    this.popUpManager.showErrorAlert(this.translate.instant('ERROR.ROL'));
+    //this.popUpManager.showErrorAlert(this.translate.instant('ERROR.ROL'));
     return false;
   }
 
@@ -43,7 +48,7 @@ function checkUrlExists(menuItems: any, targetUrl: string, params: any) {
   return menuItems.some((item: any) => {
     let UrlItem = item.Url;
     // Verificar la URL y los parámetros
-    if (UrlItem.replace("/","") === targetUrl.replace("/","")) {
+    if (UrlItem.replace("/", "") === targetUrl.replace("/", "")) {
       return true;
     }
     if (item.Opciones && item.Opciones.length > 0) {
