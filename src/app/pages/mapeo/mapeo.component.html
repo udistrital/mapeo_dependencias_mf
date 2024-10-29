@@ -81,7 +81,10 @@
                         </div>
                         
                         <ng-container *ngIf="mostrarTabla && !cargando">
-                            <table  mat-table [dataSource]="datos" class="mat-elevation-z8 tabla-gestion" aria-label="Tabla de mapeo">
+                            <table  mat-table [dataSource]="datos" class="mat-elevation-z8 tabla-gestion" aria-label="Tabla de mapeo" aria-describedby="descripcionTabla">
+                                <span id="descripcionTabla" class="visually-hidden">
+                                    Tabla de mapeo de dependencias.
+                                </span>
                                 <ng-container matColumnDef="NOMBRE">
                                     <th mat-header-cell *matHeaderCellDef class="titulo-tabla" id="columna-nombre">{{ "TABLA.COLUMNAS.NOMBRE" | translate }}</th>
                                     <td mat-cell *matCellDef="let element" class="contenido-celda"> {{element.nombre}}</td>
