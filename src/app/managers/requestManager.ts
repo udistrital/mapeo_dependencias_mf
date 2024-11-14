@@ -61,7 +61,6 @@ export class RequestManager {
       mergeMap(headerObj => {
         // Accede a los headers desde el objeto que emite el BehaviorSubject
         const headers = headerObj['headers'];
-        console.log("headers ", headers)
         // Verifica que los headers existen antes de continuar
         if (!headers) {
           throw new Error('Headers not found');
