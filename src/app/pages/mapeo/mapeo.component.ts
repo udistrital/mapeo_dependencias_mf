@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, signal} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, Input, OnInit, ViewChild, signal} from '@angular/core';
 import { MapeoBusqueda } from './../../models/mapeo-busqueda.models'
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -20,7 +20,7 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './mapeo.component.html',
   styleUrls: ['./mapeo.component.css']
 })
-export class MapeoComponent implements OnInit, AfterViewInit  {
+export class MapeoComponent implements OnInit, AfterViewInit, OnDestroy  {
   @Input('normalform') normalform: any;
   @ViewChild(MatPaginator) paginator !: MatPaginator;
   
@@ -69,6 +69,15 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
         this.gestionForm.get('vicerrectoria')?.setValue(null);
       }
     });
+    
+    window.mapeoNotify = (message: any) => {
+      console.log('Mensaje recibido en Mapeo Dependencias:', message);
+    };
+  }
+
+  ngOnDestroy() {
+    // Limpiar referencia global al destruir el componente
+    delete window.mapeoNotify;
   }
 
   ngAfterViewInit(){
