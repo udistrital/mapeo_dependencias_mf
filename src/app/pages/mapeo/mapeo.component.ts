@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, signal} from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild, signal } from '@angular/core';
 import { MapeoBusqueda } from './../../models/mapeo-busqueda.models'
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -9,6 +9,7 @@ import { Desplegables } from 'src/app/models/desplegables.models';
 import { OikosService } from '../../services/oikos.service';
 import { OikosMidService } from '../../services/oikos_mid.service';
 import { PopUpManager } from '../../managers/popUpManager'
+import { Dependencias_service } from 'src/app/services/dependencias.service';
 // @ts-ignore
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { of } from 'rxjs';
@@ -20,23 +21,24 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './mapeo.component.html',
   styleUrls: ['./mapeo.component.css']
 })
-export class MapeoComponent implements OnInit, AfterViewInit  {
+export class MapeoComponent implements OnInit, AfterViewInit {
   @Input('normalform') normalform: any;
   @ViewChild(MatPaginator) paginator !: MatPaginator;
-  
+
   tiposDependencia: Desplegables[] = [];
   facultades: Desplegables[] = [];
   vicerrectorias: Desplegables[] = [];
   mostrarTabla: boolean = false;
   cargando: boolean = false; // <-- Variable para el loader
-  columnasBusqueda = signal<string[]>(["NOMBRE","DEPENDENCIA ASOCIADAS","TIPO","ACCIONES"]);
-  gestionForm !:  FormGroup;
+  columnasBusqueda = signal<string[]>(["NOMBRE", "DEPENDENCIA ASOCIADAS", "TIPO", "ACCIONES"]);
+  gestionForm !: FormGroup;
   elementosBusqueda = signal<MapeoBusqueda[]>([]);
   datos = new MatTableDataSource<MapeoBusqueda>();
 
-  
+
 
   constructor(
+    private dependencias_service: Dependencias_service,
     private oikosService: OikosService,
     public dialog: MatDialog,
     private oikosMidService: OikosMidService,
@@ -71,11 +73,11 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
     });
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.datos.paginator = this.paginator;
   }
 
-  iniciarFormularioConsulta(){
+  iniciarFormularioConsulta() {
     this.gestionForm = new FormGroup({
       nombre: new FormControl("", {
         nonNullable: false,
@@ -140,14 +142,52 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
     });
   }
 
-  abrirDialogGenerarEditarMapeo(tipo: string, element:MapeoBusqueda){
-    const dialogRef = this.dialog.open(GenerarEditarMapeoDialogComponent, {
-      width: '70%',
-      height: 'auto',
-      maxHeight: '65vh',
-      data:{
-        tipo:tipo,
-        element:element,
+  abrirDialogGenerarEditarMapeo(tipo: string, element: MapeoBusqueda) {
+    let validador = false;
+    this.dependencias_service.get('mapeo_dependencia/' + element.id).subscribe((res: any) => {
+      const collection = res?.mapeo_dependencias_pruebasCollection;
+
+      if (collection && Object.keys(collection).length === 0) {
+        // Caso 1: El objeto está vacío
+        if (tipo == "GENERAR") {
+          validador = true;
+        } else {
+          validador = false;
+        }
+      } else if (
+        collection?.mapeo_dependencias_pruebas &&
+        Array.isArray(collection.mapeo_dependencias_pruebas) &&
+        collection.mapeo_dependencias_pruebas.length > 0
+      ) {
+        // Caso 2: El objeto tiene contenido
+        if (tipo == "GENERAR") {
+          validador = false;
+        } else {
+          validador = true;
+        }
+      } else {
+        // Caso opcional: Ni vacío ni con contenido válido
+        if (tipo == "GENERAR") {
+          validador = false;
+        } else {
+          validador = true;
+        }
+      }
+
+      if (tipo == "GENERAR" && !validador) {
+        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.MAPEO_EXISTENTE'));
+      } else if (tipo == "EDITAR" && !validador) {
+        this.popUpManager.showErrorAlert(this.translate.instant('ERROR.NO_MAPEO'));
+      } else if (validador) {
+        const dialogRef = this.dialog.open(GenerarEditarMapeoDialogComponent, {
+          width: '70%',
+          height: 'auto',
+          maxHeight: '65vh',
+          data: {
+            tipo: tipo,
+            element: element,
+          }
+        });
       }
     });
   }
@@ -172,7 +212,7 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
     }
 
     if (this.gestionForm.value.estado) {
-      if ( this.gestionForm.value.estado != '...'){
+      if (this.gestionForm.value.estado != '...') {
         busqueda.BusquedaEstado = {
           Estado: this.gestionForm.value.estado === "ACTIVO"
         };
@@ -184,7 +224,7 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
 
   buscarDependencias() {
     const busqueda = this.construirBusqueda();
-    
+
     if (Object.keys(busqueda).length !== 0) {
       this.busqueda(busqueda).then((resultadosParciales) => {
         this.procesarResultados(resultadosParciales);
@@ -200,7 +240,7 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
           Estado: false
         }
       };
-      
+
       this.busqueda(busquedaActiva).then((resultadosActivos) => {
         this.busqueda(busquedaInactiva).then((resultadosInactivos) => {
           const resultadosTotales = [...resultadosActivos, ...resultadosInactivos];
@@ -209,11 +249,11 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
       });
     }
   }
-  
+
 
   busqueda(busqueda: any): Promise<any[]> {
     this.popUpManager.showLoaderAlert(this.translate.instant('CARGA.BUSQUEDA'));
-    this.mostrarTabla = false;  
+    this.mostrarTabla = false;
     return new Promise((resolve, reject) => {
       this.oikosMidService.post("gestion_dependencias_mid/BuscarDependencia", busqueda).pipe(
         tap((res: any) => {
@@ -226,7 +266,7 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
               dependenciasAsociadas: item.DependenciaAsociada ? {
                 id: item.DependenciaAsociada.Id,
                 nombre: item.DependenciaAsociada.Nombre
-              }: null,
+              } : null,
               tipoDependencia: item.TipoDependencia.map((tipo: any) => ({
                 id: tipo.Id,
                 nombre: tipo.Nombre,
@@ -235,14 +275,14 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
             }));
             resolve(datosTransformados);
           } else {
-            resolve([]); 
+            resolve([]);
           }
         }),
         catchError((error) => {
           Swal.close();
           this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.BUSQUEDA') + (error.message || this.translate.instant('ERROR.DESCONOCIDO')));
           this.mostrarTabla = false;
-          reject(error); 
+          reject(error);
           return of(null);
         })
       ).subscribe();
@@ -255,7 +295,7 @@ export class MapeoComponent implements OnInit, AfterViewInit  {
       this.datos = new MatTableDataSource<MapeoBusqueda>(resultados);
       setTimeout(() => { this.datos.paginator = this.paginator; }, 1000);
       this.popUpManager.showSuccessAlert(this.translate.instant('EXITO.BUSQUEDA'));
-      this.mostrarTabla = true;  
+      this.mostrarTabla = true;
     } else {
       this.popUpManager.showErrorAlert(this.translate.instant('ERROR.BUSQUEDA.DATOS'));
       this.mostrarTabla = false;
