@@ -149,7 +149,6 @@ export class MapeoComponent implements OnInit, AfterViewInit {
 
       if (collection && Object.keys(collection).length === 0) {
         // Caso 1: El objeto está vacío
-        console.log("El mapeo está vacío.");
         if (tipo == "GENERAR") {
           validador = true;
         } else {
@@ -161,7 +160,6 @@ export class MapeoComponent implements OnInit, AfterViewInit {
         collection.mapeo_dependencias_pruebas.length > 0
       ) {
         // Caso 2: El objeto tiene contenido
-        console.log("El mapeo tiene contenido.");
         if (tipo == "GENERAR") {
           validador = false;
         } else {
@@ -169,7 +167,6 @@ export class MapeoComponent implements OnInit, AfterViewInit {
         }
       } else {
         // Caso opcional: Ni vacío ni con contenido válido
-        console.log("La estructura no es la esperada.");
         if (tipo == "GENERAR") {
           validador = false;
         } else {
