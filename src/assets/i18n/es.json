@@ -72,7 +72,9 @@
         "DESCONOCIDO":"Error desconocido",
         "GENERAR_MAPEO":"Error al crear mapeo",
         "EDITAR_MAPEO":"Error al editar mapeo",
-        "ROL": "El usuario no cuenta con permisos"
+        "ROL": "El usuario no cuenta con permisos",
+        "MAPEO_EXISTENTE": "Esta dependencia ya tiene asignado un mapeo",
+        "NO_MAPEO": "Esta dependencia no cuenta con mapeo por lo que no es editable"
     },
     "CARGA":{
       "BUSQUEDA":"Obteniendo datos...",
